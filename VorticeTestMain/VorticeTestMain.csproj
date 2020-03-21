@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Vortice.Direct3D12.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.Direct3D12.props" Condition="Exists('..\packages\Vortice.Direct3D12.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.Direct3D12.props')" />
+  <Import Project="..\packages\Vortice.DXGI.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.DXGI.props" Condition="Exists('..\packages\Vortice.DXGI.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.DXGI.props')" />
+  <Import Project="..\packages\Vortice.DirectX.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.DirectX.props" Condition="Exists('..\packages\Vortice.DirectX.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.DirectX.props')" />
+  <Import Project="..\packages\Vortice.Runtime.COM.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.Runtime.COM.props" Condition="Exists('..\packages\Vortice.Runtime.COM.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.Runtime.COM.props')" />
   <Import Project="..\packages\SharpGen.Runtime.1.2.1\build\SharpGen.Runtime.props" Condition="Exists('..\packages\SharpGen.Runtime.1.2.1\build\SharpGen.Runtime.props')" />
-  <Import Project="..\packages\Vortice.Direct3D12.1.5.0\build\netstandard2.0\Vortice.Direct3D12.props" Condition="Exists('..\packages\Vortice.Direct3D12.1.5.0\build\netstandard2.0\Vortice.Direct3D12.props')" />
-  <Import Project="..\packages\Vortice.DXGI.1.5.0\build\netstandard2.0\Vortice.DXGI.props" Condition="Exists('..\packages\Vortice.DXGI.1.5.0\build\netstandard2.0\Vortice.DXGI.props')" />
-  <Import Project="..\packages\Vortice.DirectX.1.5.0\build\netstandard2.0\Vortice.DirectX.props" Condition="Exists('..\packages\Vortice.DirectX.1.5.0\build\netstandard2.0\Vortice.DirectX.props')" />
-  <Import Project="..\packages\Vortice.Runtime.COM.1.5.0\build\netstandard2.0\Vortice.Runtime.COM.props" Condition="Exists('..\packages\Vortice.Runtime.COM.1.5.0\build\netstandard2.0\Vortice.Runtime.COM.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -72,20 +72,20 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vortice.Direct3D12, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Vortice.Direct3D12.1.5.0\lib\netstandard2.0\Vortice.Direct3D12.dll</HintPath>
+    <Reference Include="Vortice.Direct3D12, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Vortice.Direct3D12.1.6.21-beta-g38f134d486\lib\netstandard2.0\Vortice.Direct3D12.dll</HintPath>
     </Reference>
-    <Reference Include="Vortice.DirectX, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Vortice.DirectX.1.5.0\lib\netstandard2.0\Vortice.DirectX.dll</HintPath>
+    <Reference Include="Vortice.DirectX, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Vortice.DirectX.1.6.21-beta-g38f134d486\lib\netstandard2.0\Vortice.DirectX.dll</HintPath>
     </Reference>
-    <Reference Include="Vortice.DXGI, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Vortice.DXGI.1.5.0\lib\netstandard2.0\Vortice.DXGI.dll</HintPath>
+    <Reference Include="Vortice.DXGI, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Vortice.DXGI.1.6.21-beta-g38f134d486\lib\netstandard2.0\Vortice.DXGI.dll</HintPath>
     </Reference>
     <Reference Include="Vortice.Mathematics, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Vortice.Mathematics.1.2.1\lib\net472\Vortice.Mathematics.dll</HintPath>
     </Reference>
-    <Reference Include="Vortice.Runtime.COM, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Vortice.Runtime.COM.1.5.0\lib\netstandard2.0\Vortice.Runtime.COM.dll</HintPath>
+    <Reference Include="Vortice.Runtime.COM, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Vortice.Runtime.COM.1.6.21-beta-g38f134d486\lib\netstandard2.0\Vortice.Runtime.COM.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -129,10 +129,10 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Vortice.Runtime.COM.1.5.0\build\netstandard2.0\Vortice.Runtime.COM.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vortice.Runtime.COM.1.5.0\build\netstandard2.0\Vortice.Runtime.COM.props'))" />
-    <Error Condition="!Exists('..\packages\Vortice.DirectX.1.5.0\build\netstandard2.0\Vortice.DirectX.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vortice.DirectX.1.5.0\build\netstandard2.0\Vortice.DirectX.props'))" />
-    <Error Condition="!Exists('..\packages\Vortice.DXGI.1.5.0\build\netstandard2.0\Vortice.DXGI.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vortice.DXGI.1.5.0\build\netstandard2.0\Vortice.DXGI.props'))" />
-    <Error Condition="!Exists('..\packages\Vortice.Direct3D12.1.5.0\build\netstandard2.0\Vortice.Direct3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vortice.Direct3D12.1.5.0\build\netstandard2.0\Vortice.Direct3D12.props'))" />
     <Error Condition="!Exists('..\packages\SharpGen.Runtime.1.2.1\build\SharpGen.Runtime.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SharpGen.Runtime.1.2.1\build\SharpGen.Runtime.props'))" />
+    <Error Condition="!Exists('..\packages\Vortice.Runtime.COM.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.Runtime.COM.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vortice.Runtime.COM.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.Runtime.COM.props'))" />
+    <Error Condition="!Exists('..\packages\Vortice.DirectX.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.DirectX.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vortice.DirectX.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.DirectX.props'))" />
+    <Error Condition="!Exists('..\packages\Vortice.DXGI.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.DXGI.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vortice.DXGI.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.DXGI.props'))" />
+    <Error Condition="!Exists('..\packages\Vortice.Direct3D12.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.Direct3D12.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Vortice.Direct3D12.1.6.21-beta-g38f134d486\build\netstandard2.0\Vortice.Direct3D12.props'))" />
   </Target>
 </Project>

@@ -57,8 +57,8 @@ namespace RomDX
             }
 
 
-            var adapters = DXGIFactory.EnumAdapters();
-            for(var i = 0; i < adapters.Length; i++)
+            var adapters = DXGIFactory.Adapters1;
+            for(var i = 0; i < adapters.Count; i++)
             {
                 var adapter = adapters[i];
                 var desc = adapter.Description;
@@ -239,8 +239,6 @@ namespace RomDX
             _commandList.SetGraphicsRootSignature(_rootSignature);
             _commandList.RSSetViewport(new Viewport(pictureBox1.Width, pictureBox1.Height));
             _commandList.RSSetScissorRect(new Vortice.Mathematics.Rectangle(pictureBox1.Width, pictureBox1.Height));
-            //_commandList.RSSetScissorRect(new Rect(0, 0, pictureBox1.Width, pictureBox1.Height));
-
 
             // Indicate that the back buffer will be used as a render target.
             _commandList.ResourceBarrierTransition(_renderTargets[_frameIndex],
@@ -257,7 +255,7 @@ namespace RomDX
 
             // Record commands.
             var clearColor = new Color4(0.0f, 0.2f, 0.4f, 1.0f);
-            //_commandList.ClearRenderTargetView(rtvHandle, clearColor);
+            _commandList.ClearRenderTargetView(rtvHandle, clearColor);
 
             _commandList.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
             var stride = Unsafe.SizeOf<Vertex>();
