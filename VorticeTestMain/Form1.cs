@@ -1,72 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using SharpGen.Runtime;
+using System;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Vortice.Direct3D12;
-using Vortice.Direct3D12.Debug;
-using Vortice.DXGI;
-using Vortice.Direct3D;
-using SharpGen.Runtime;
-using static Vortice.Direct3D12.D3D12;
-using static Vortice.DXGI.DXGI;
-using Vortice.Mathematics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Windows.Forms;
+using Vortice.Direct3D;
+using Vortice.Direct3D12;
+using Vortice.DXGI;
+using Vortice.Mathematics;
+using static Vortice.Direct3D12.D3D12;
+using static Vortice.DXGI.DXGI;
 
 namespace RomDX
 {
     public partial class Form1 : Form
     {
         private const int FrameCount = 2;
+
+        ID3D12CommandAllocator _commandAllocator;
+        //ID3D12Texture2D backBuffer;
+        //ID3D12RenderTargetView renderView;
+        ID3D12GraphicsCommandList _commandList;
+        ID3D12CommandQueue _d3d12CommandQueue;
+        ID3D12Device _d3d12Device;
+        ID3D12Fence _d3d12Fence;
+        AutoResetEvent _fenceEvent;
+        long _fenceValue;
+        int _frameIndex;
+        ID3D12PipelineState _pipelineState;
+        ID3D12Resource[] _renderTargets;
+        ID3D12RootSignature _rootSignature;
+        int _rtvDescriptorSize;
+        ID3D12DescriptorHeap _rtvHeap;
+        ID3D12Resource _vertexBuffer;
+        IDXGIAdapter dXGIAdapter;
         //private IGraphicsDevice _graphicsDevice;
         //public Window MainWindow { get; private set; }
         IDXGIFactory4 DXGIFactory;
         IntPtr hwnd;
-        ID3D12Device _d3d12Device;
         public IDXGISwapChain3 SwapChain;
-        IDXGIAdapter dXGIAdapter;
-        //ID3D12Texture2D backBuffer;
-        //ID3D12RenderTargetView renderView;
-        ID3D12GraphicsCommandList _commandList;
-        ID3D12RootSignature _rootSignature;
-        ID3D12CommandAllocator _commandAllocator;
-        ID3D12DescriptorHeap _rtvHeap;
-        int _rtvDescriptorSize;
-        ID3D12Resource[] _renderTargets;
-        ID3D12CommandQueue _d3d12CommandQueue;
-        int _frameIndex;
-        ID3D12PipelineState _pipelineState;
-        ID3D12Resource _vertexBuffer;
-        ID3D12Fence _d3d12Fence;
-        long _fenceValue;
-        AutoResetEvent _fenceEvent;
 
-        public Form1()
-        {
-            InitializeComponent();
-        }
+        public Form1() => InitializeComponent();
+
+        private void button1_Click(object sender, EventArgs e) => DrawFrame();
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (!D3D12.IsSupported(FeatureLevel.Level_12_1)) return;
-            // D3D12.D3D12CreateDevice(null, FeatureLevel.Level_12_1, out _d3d12Device);               
+            if(!D3D12.IsSupported(FeatureLevel.Level_12_1))
+                return;
 
-
-            if (CreateDXGIFactory2(true, out DXGIFactory).Failure)
+            if(CreateDXGIFactory2(true, out DXGIFactory).Failure)
             {
                 throw new InvalidOperationException("Cannot create IDXGIFactory4");
             }
 
 
-
             var adapters = DXGIFactory.EnumAdapters();
-            for (var i = 0; i < adapters.Length; i++)
+            for(var i = 0; i < adapters.Length; i++)
             {
                 var adapter = adapters[i];
                 var desc = adapter.Description;
@@ -77,7 +69,7 @@ namespace RomDX
                 //    continue;
                 //}
 
-                if (D3D12CreateDevice(adapter, FeatureLevel.Level_12_0, out var deviceTmp).Success)
+                if(D3D12CreateDevice(adapter, FeatureLevel.Level_12_0, out var deviceTmp).Success)
                 {
                     dXGIAdapter = adapter;
                     _d3d12Device = deviceTmp;
@@ -107,21 +99,21 @@ namespace RomDX
             SwapChain = swapChain.QueryInterface<IDXGISwapChain3>();
             _frameIndex = SwapChain.GetCurrentBackBufferIndex();
 
-            _rtvHeap = _d3d12Device.CreateDescriptorHeap(new DescriptorHeapDescription(DescriptorHeapType.RenderTargetView, FrameCount));
+            _rtvHeap = _d3d12Device.CreateDescriptorHeap(new DescriptorHeapDescription(DescriptorHeapType.RenderTargetView,
+                                                                                       FrameCount));
             _rtvDescriptorSize = _d3d12Device.GetDescriptorHandleIncrementSize(DescriptorHeapType.RenderTargetView);
 
             // Create frame resources.
-            {
-                var rtvHandle = _rtvHeap.GetCPUDescriptorHandleForHeapStart();
 
-                // Create a RTV for each frame.
-                _renderTargets = new ID3D12Resource[FrameCount];
-                for (var i = 0; i < FrameCount; i++)
-                {
-                    _renderTargets[i] = SwapChain.GetBuffer<ID3D12Resource>(i);
-                    _d3d12Device.CreateRenderTargetView(_renderTargets[i], null, rtvHandle);
-                    rtvHandle += _rtvDescriptorSize;
-                }
+            var rtvHandle = _rtvHeap.GetCPUDescriptorHandleForHeapStart();
+
+            // Create a RTV for each frame.
+            _renderTargets = new ID3D12Resource[FrameCount];
+            for(var i = 0; i < FrameCount; i++)
+            {
+                _renderTargets[i] = SwapChain.GetBuffer<ID3D12Resource>(i);
+                _d3d12Device.CreateRenderTargetView(_renderTargets[i], null, rtvHandle);
+                rtvHandle += _rtvDescriptorSize;
             }
 
             _commandAllocator = _d3d12Device.CreateCommandAllocator(CommandListType.Direct);
@@ -130,9 +122,7 @@ namespace RomDX
             var highestRootSignatureVersion = _d3d12Device.CheckHighestRootSignatureVersion(RootSignatureVersion.Version11);
             //var opts5 = _d3d12Device.CheckFeatureSupport<FeatureDataD3D12Options5>(SharpDirect3D12.Feature.Options5);
 
-            var rootSignatureDesc = new VersionedRootSignatureDescription(
-                new RootSignatureDescription1(RootSignatureFlags.AllowInputAssemblerInputLayout)
-                );
+            var rootSignatureDesc = new VersionedRootSignatureDescription(new RootSignatureDescription1(RootSignatureFlags.AllowInputAssemblerInputLayout));
 
             _rootSignature = _d3d12Device.CreateRootSignature(0, rootSignatureDesc);
 
@@ -185,25 +175,24 @@ namespace RomDX
 
             var vertexBufferSize = 3 * Unsafe.SizeOf<Vertex>();
 
-            _vertexBuffer = _d3d12Device.CreateCommittedResource(
-                new HeapProperties(HeapType.Upload),
-                HeapFlags.None,
-                ResourceDescription.Buffer(vertexBufferSize),
-                ResourceStates.GenericRead);
+            _vertexBuffer = _d3d12Device.CreateCommittedResource(new HeapProperties(HeapType.Upload),
+                                                                 HeapFlags.None,
+                                                                 ResourceDescription.Buffer(vertexBufferSize),
+                                                                 ResourceStates.GenericRead);
 
             var triangleVertices = new Vertex[]
             {
-                  new Vertex(new Vector3(0f, 0.5f, 0.0f), new Color4(1.0f, 0.0f, 0.0f, 1.0f)),
-                  new Vertex(new Vector3(0.5f, -0.5f, 0.0f), new Color4(0.0f, 1.0f, 0.0f, 1.0f)),
-                  new Vertex(new Vector3(-0.5f, -0.5f, 0.0f), new Color4(0.0f, 0.0f, 1.0f, 1.0f))
+                new Vertex(new Vector3(0f, 0.5f, 0.0f), new Color4(1.0f, 0.0f, 0.0f, 1.0f)),
+                new Vertex(new Vector3(0.5f, -0.5f, 0.0f), new Color4(0.0f, 1.0f, 0.0f, 1.0f)),
+                new Vertex(new Vector3(-0.5f, -0.5f, 0.0f), new Color4(0.0f, 0.0f, 1.0f, 1.0f))
             };
 
             unsafe
             {
-                var bufferData = _vertexBuffer.Map(0);
-                var src = new ReadOnlySpan<Vertex>(triangleVertices);
-                MemoryHelpers.CopyMemory(bufferData, src);
-                _vertexBuffer.Unmap(0);
+    var bufferData = _vertexBuffer.Map(0);
+    var src = new ReadOnlySpan<Vertex>(triangleVertices);
+    MemoryHelpers.CopyMemory(bufferData, src);
+    _vertexBuffer.Unmap(0);
             }
 
             // Create synchronization objects.
@@ -216,7 +205,29 @@ namespace RomDX
             //var  backBuffer = swapChain.GetBuffer<ID3D12Texture2D>(0);
             //var renderView = device.CreateRenderTargetView(backBuffer);
             // CreateDXGIFactory2(true, out DXGIFactory);
+        }
 
+
+        private void WaitForPreviousFrame()
+        {
+            // WAITING FOR THE FRAME TO COMPLETE BEFORE CONTINUING IS NOT BEST PRACTICE.
+            // This is code implemented as such for simplicity. The D3D12HelloFrameBuffering
+            // sample illustrates how to use fences for efficient resource usage and to
+            // maximize GPU utilization.
+
+            // Signal and increment the fence value.
+            var fenceValueToSignal = _fenceValue;
+            _d3d12CommandQueue.Signal(_d3d12Fence, fenceValueToSignal);
+            _fenceValue++;
+
+            // Wait until the previous frame is finished.
+            if(_d3d12Fence.CompletedValue < fenceValueToSignal)
+            {
+                _d3d12Fence.SetEventOnCompletion(fenceValueToSignal, _fenceEvent);
+                _fenceEvent.WaitOne();
+            }
+
+            _frameIndex = SwapChain.GetCurrentBackBufferIndex();
         }
 
         public bool DrawFrame() //Action<int, int> draw, [CallerMemberName]string frameName = null)
@@ -232,7 +243,9 @@ namespace RomDX
 
 
             // Indicate that the back buffer will be used as a render target.
-            _commandList.ResourceBarrierTransition(_renderTargets[_frameIndex], ResourceStates.Present, ResourceStates.RenderTarget);
+            _commandList.ResourceBarrierTransition(_renderTargets[_frameIndex],
+                                                   ResourceStates.Present,
+                                                   ResourceStates.RenderTarget);
 
             // Call callback.
             //draw(Window.Width, Window.Height);
@@ -249,11 +262,15 @@ namespace RomDX
             _commandList.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
             var stride = Unsafe.SizeOf<Vertex>();
             var vertexBufferSize = 3 * stride;
-            _commandList.IASetVertexBuffers(new VertexBufferView(_vertexBuffer.GPUVirtualAddress, vertexBufferSize, stride));
+            _commandList.IASetVertexBuffers(new VertexBufferView(_vertexBuffer.GPUVirtualAddress,
+                                                                 vertexBufferSize,
+                                                                 stride));
             _commandList.DrawInstanced(3, 1, 0, 0);
 
             // Indicate that the back buffer will now be used to present.
-            _commandList.ResourceBarrierTransition(_renderTargets[_frameIndex], ResourceStates.RenderTarget, ResourceStates.Present);
+            _commandList.ResourceBarrierTransition(_renderTargets[_frameIndex],
+                                                   ResourceStates.RenderTarget,
+                                                   ResourceStates.Present);
             _commandList.Close();
 
             // Execute the command list.
@@ -272,29 +289,6 @@ namespace RomDX
         }
 
 
-        private void WaitForPreviousFrame()
-        {
-            // WAITING FOR THE FRAME TO COMPLETE BEFORE CONTINUING IS NOT BEST PRACTICE.
-            // This is code implemented as such for simplicity. The D3D12HelloFrameBuffering
-            // sample illustrates how to use fences for efficient resource usage and to
-            // maximize GPU utilization.
-
-            // Signal and increment the fence value.
-            var fenceValueToSignal = _fenceValue;
-            _d3d12CommandQueue.Signal(_d3d12Fence, fenceValueToSignal);
-            _fenceValue++;
-
-            // Wait until the previous frame is finished.
-            if (_d3d12Fence.CompletedValue < fenceValueToSignal)
-            {
-                _d3d12Fence.SetEventOnCompletion(fenceValueToSignal, _fenceEvent);
-                _fenceEvent.WaitOne();
-            }
-
-            _frameIndex = SwapChain.GetCurrentBackBufferIndex();
-        }
-
-
         private readonly struct Vertex
         {
             public readonly Vector3 Position;
@@ -305,11 +299,7 @@ namespace RomDX
                 Position = position;
                 Color = color;
             }
-        };
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            DrawFrame();
         }
+;
     }
 }
