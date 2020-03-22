@@ -48,17 +48,17 @@ namespace RomDX
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            if(!D3D12.IsSupported(FeatureLevel.Level_12_1))
+            if (!IsSupported(FeatureLevel.Level_12_1))
                 return;
 
-            if(CreateDXGIFactory2(true, out DXGIFactory).Failure)
+            if (CreateDXGIFactory2(true, out DXGIFactory).Failure)
             {
                 throw new InvalidOperationException("Cannot create IDXGIFactory4");
             }
 
 
             var adapters = DXGIFactory.Adapters1;
-            for(var i = 0; i < adapters.Count; i++)
+            for (var i = 0; i < adapters.Count; i++)
             {
                 var adapter = adapters[i];
                 var desc = adapter.Description;
@@ -69,7 +69,7 @@ namespace RomDX
                 //    continue;
                 //}
 
-                if(D3D12CreateDevice(adapter, FeatureLevel.Level_12_0, out var deviceTmp).Success)
+                if (D3D12CreateDevice(adapter, FeatureLevel.Level_12_0, out var deviceTmp).Success)
                 {
                     dXGIAdapter = adapter;
                     _d3d12Device = deviceTmp;
@@ -109,7 +109,7 @@ namespace RomDX
 
             // Create a RTV for each frame.
             _renderTargets = new ID3D12Resource[FrameCount];
-            for(var i = 0; i < FrameCount; i++)
+            for (var i = 0; i < FrameCount; i++)
             {
                 _renderTargets[i] = SwapChain.GetBuffer<ID3D12Resource>(i);
                 _d3d12Device.CreateRenderTargetView(_renderTargets[i], null, rtvHandle);
@@ -118,11 +118,13 @@ namespace RomDX
 
             _commandAllocator = _d3d12Device.CreateCommandAllocator(CommandListType.Direct);
 
-            //var highestShaderVersion = _d3d12Device.CheckHighestShaderModel(ShaderModel.Model60);
+            var highestShaderVersion = _d3d12Device.CheckHighestShaderModel(ShaderModel.Model60);
             var highestRootSignatureVersion = _d3d12Device.CheckHighestRootSignatureVersion(RootSignatureVersion.Version11);
             //var opts5 = _d3d12Device.CheckFeatureSupport<FeatureDataD3D12Options5>(SharpDirect3D12.Feature.Options5);
 
-            var rootSignatureDesc = new VersionedRootSignatureDescription(new RootSignatureDescription1(RootSignatureFlags.AllowInputAssemblerInputLayout));
+         
+
+             var rootSignatureDesc = new VersionedRootSignatureDescription(new RootSignatureDescription1(RootSignatureFlags.AllowInputAssemblerInputLayout));
 
             _rootSignature = _d3d12Device.CreateRootSignature(0, rootSignatureDesc);
 
@@ -145,6 +147,8 @@ namespace RomDX
             {
             }
 ";
+
+          
 
             var inputElementDescs = new[]
             {
@@ -189,11 +193,13 @@ namespace RomDX
 
             unsafe
             {
-    var bufferData = _vertexBuffer.Map(0);
-    var src = new ReadOnlySpan<Vertex>(triangleVertices);
-    MemoryHelpers.CopyMemory(bufferData, src);
-    _vertexBuffer.Unmap(0);
+                var bufferData = _vertexBuffer.Map(0);
+                var src = new ReadOnlySpan<Vertex>(triangleVertices);
+                MemoryHelpers.CopyMemory(bufferData, src);
+                _vertexBuffer.Unmap(0);
             }
+
+            //_d3d12Device.
 
             // Create synchronization objects.
             _d3d12Fence = _d3d12Device.CreateFence(0);
@@ -221,7 +227,7 @@ namespace RomDX
             _fenceValue++;
 
             // Wait until the previous frame is finished.
-            if(_d3d12Fence.CompletedValue < fenceValueToSignal)
+            if (_d3d12Fence.CompletedValue < fenceValueToSignal)
             {
                 _d3d12Fence.SetEventOnCompletion(fenceValueToSignal, _fenceEvent);
                 _fenceEvent.WaitOne();
@@ -247,6 +253,30 @@ namespace RomDX
 
             // Call callback.
             //draw(Window.Width, Window.Height);
+
+            
+            
+            var rotationMatrix = Matrix4x4.Identity;
+
+            var matTmp = Matrix4x4.CreateRotationX(Convert.ToSingle(0.5));
+            rotationMatrix = Matrix4x4.Multiply(rotationMatrix, matTmp);
+
+            matTmp = Matrix4x4.CreateRotationY(Convert.ToSingle(1));
+            rotationMatrix = Matrix4x4.Multiply(rotationMatrix, matTmp);
+
+            //var vecView = new Vector3(0, 0, -400);
+            //vecView = Matrix.TransformCoordinate(vecView, rotationMatrix);
+            //vecView = Vector3.Add(Dessin3DObject.Centre, vecView);
+
+            //if (Dessin3DObject.CameraX != 90) ViewMatrix = Matrix.LookAtLH(vecView, Dessin3DObject.Centre, new Vector3(0, 1, 0));
+            //else ViewMatrix = Matrix.LookAtLH(vecView, Dessin3DObject.Centre, new Vector3(0, 0, 1));
+
+            //D3DDevice.Transform.View = ViewMatrix;
+
+            //SwapChain.Rotation = rotationMatrix;
+            //SwapChain.MatrixTransform = new Matrix3x2();
+
+            //var context = _d3d12Device.;
 
             var rtvHandle = _rtvHeap.GetCPUDescriptorHandleForHeapStart();
             rtvHandle += _frameIndex * _rtvDescriptorSize;
